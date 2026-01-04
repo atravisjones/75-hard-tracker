@@ -1,18 +1,38 @@
 import { View, Text, Pressable, Image, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useChallenge } from '@/context/ChallengeContext';
+import { useRef } from 'react';
 
 export function PhotoCard() {
   const { state, setPhoto } = useChallenge();
   const router = useRouter();
   const photoUri = state.todayProgress?.photoUri;
   const hasPhoto = photoUri !== null;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Web file input handler
+  const handleWebFileSelect = (event: any) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        setPhoto(dataUrl);
+        Alert.alert(
+          'Photo Selected!',
+          "Today's progress photo has been set.",
+          [{ text: 'OK' }]
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Direct gallery picker for native platforms
   const pickFromGallery = async () => {
     if (Platform.OS === 'web') {
-      // On web, go to camera screen which handles file input
-      router.push('/camera');
+      // On web, trigger file input
+      fileInputRef.current?.click();
       return;
     }
 
@@ -53,6 +73,17 @@ export function PhotoCard() {
 
   return (
     <View className="bg-dark-300 rounded-2xl p-5 mb-4">
+      {/* Hidden file input for web */}
+      {Platform.OS === 'web' && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleWebFileSelect}
+          style={{ display: 'none' }}
+        />
+      )}
+
       {/* Header */}
       <View className="flex-row items-center justify-between mb-4">
         <View className="flex-row items-center">
