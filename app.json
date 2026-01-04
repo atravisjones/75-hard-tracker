@@ -32,7 +32,14 @@
     "plugins": [
       "expo-router",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you upload progress photos.",
+          "cameraPermission": "The app accesses your camera to let you take progress photos."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
