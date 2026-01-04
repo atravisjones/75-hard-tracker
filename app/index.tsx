@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, TextInput } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useChallenge } from '@/context/ChallengeContext';
-import { TaskItem } from '@/components/TaskItem';
-import { ReminderModal } from '@/components/ReminderModal';
-import { CHALLENGE_DAYS, WATER_GOAL_OZ, READING_GOAL_PAGES, WORKOUT_DURATION_MINUTES, MILESTONES } from '@/constants/challenge';
+import { Header } from '@/components/Header';
+import { TaskSummary } from '@/components/TaskSummary';
+import { DietCard } from '@/components/DietCard';
+import { WorkoutCard } from '@/components/WorkoutCard';
+import { WaterTracker } from '@/components/WaterTracker';
+import { ReadingTracker } from '@/components/ReadingTracker';
+import { PhotoCard } from '@/components/PhotoCard';
+import { NotesSection } from '@/components/NotesSection';
+import { StickyProgressHeader } from '@/components/StickyProgressHeader';
+import { CHALLENGE_DAYS, MILESTONES } from '@/constants/challenge';
 
 function OnboardingScreen() {
   const { startChallenge, completeOnboarding } = useChallenge();
+  const router = useRouter();
 
   const handleStart = () => {
     completeOnboarding();
@@ -19,45 +27,73 @@ function OnboardingScreen() {
     <SafeAreaView className="flex-1 bg-black">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 24, justifyContent: 'center', flexGrow: 1 }}
+        contentContainerStyle={{ padding: 24 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Logo */}
-        <View className="items-center mb-12">
-          <View className="flex-row items-center mb-2">
+        <View className="items-center mb-8 mt-8">
+          <View className="flex-row items-center mb-4">
             <View className="bg-white rounded-lg p-3 mr-2">
-              <Text className="text-black text-3xl">♠️</Text>
+              <Text className="text-black text-4xl">♠️</Text>
             </View>
             <Text className="text-white text-5xl font-bold">75</Text>
           </View>
-          <Text className="text-accent text-2xl font-bold tracking-widest">HARD</Text>
+          <Text className="text-accent text-4xl font-bold">HARD</Text>
+          <Text className="text-gray-400 text-lg mt-2">Mental Toughness Program</Text>
         </View>
 
-        {/* Tagline */}
-        <Text className="text-white text-2xl font-bold text-center mb-2">
-          Track your daily
-        </Text>
-        <Text className="text-white text-2xl font-bold text-center mb-8">
-          75 Hard tasks.
-        </Text>
+        {/* Rules */}
+        <View className="bg-dark-300 rounded-2xl p-6 mb-6">
+          <Text className="text-white text-xl font-bold mb-4">
+            The 5 Daily Tasks
+          </Text>
+          <Text className="text-gray-400 mb-4">
+            Complete ALL tasks every day for 75 days. Miss one? Start over at Day 1.
+          </Text>
 
-        {/* Task Preview */}
-        <View className="bg-dark-200 border border-dark-400 rounded-xl p-4 mb-8">
-          {['Follow a Diet', '2 Workouts (45 min)', 'Drink 1 Gallon', 'Read 10 Pages', 'Progress Photo'].map((task, i) => (
-            <View key={i} className="flex-row items-center py-2">
-              <View className="w-6 h-6 rounded border-2 border-accent mr-3" />
-              <Text className="text-gray-400">{task}</Text>
-            </View>
-          ))}
+          <View className="gap-4">
+            <TaskRule
+              icon="🥗"
+              title="Follow a Diet"
+              desc="No cheat meals, no alcohol"
+            />
+            <TaskRule
+              icon="💪"
+              title="Two 45-min Workouts"
+              desc="One must be outdoors, 3+ hours apart"
+            />
+            <TaskRule
+              icon="💧"
+              title="Drink 1 Gallon of Water"
+              desc="128 oz throughout the day"
+            />
+            <TaskRule
+              icon="📖"
+              title="Read 10 Pages"
+              desc="Non-fiction / self-development"
+            />
+            <TaskRule
+              icon="📸"
+              title="Take a Progress Photo"
+              desc="Document your journey daily"
+            />
+          </View>
+        </View>
+
+        {/* Warning */}
+        <View className="bg-accent/20 rounded-xl p-4 mb-8">
+          <Text className="text-accent text-center font-semibold">
+            ⚠️ No modifications. No substitutions. No excuses.
+          </Text>
         </View>
 
         {/* Start Button */}
         <Pressable
           onPress={handleStart}
-          className="bg-accent py-4 rounded-xl active:bg-accent-dark"
+          className="bg-accent py-5 rounded-xl active:bg-accent-dark"
         >
-          <Text className="text-white text-center text-lg font-bold">
-            Start Challenge
+          <Text className="text-white text-center text-xl font-bold">
+            Start 75 Hard Challenge
           </Text>
         </Pressable>
       </ScrollView>
@@ -65,242 +101,121 @@ function OnboardingScreen() {
   );
 }
 
+function TaskRule({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+  return (
+    <View className="flex-row items-center">
+      <View className="w-12 h-12 bg-dark-400 rounded-full items-center justify-center mr-4">
+        <Text className="text-xl">{icon}</Text>
+      </View>
+      <View className="flex-1">
+        <Text className="text-white font-semibold">{title}</Text>
+        <Text className="text-gray-500 text-sm">{desc}</Text>
+      </View>
+    </View>
+  );
+}
+
+// Minimized completed task card
+function CompletedTaskCard({ icon, title }: { icon: string; title: string }) {
+  return (
+    <View className="bg-dark-300/60 rounded-xl px-4 py-3 mb-2 flex-row items-center justify-between">
+      <View className="flex-row items-center">
+        <View className="w-8 h-8 bg-accent rounded-full items-center justify-center mr-3">
+          <Text className="text-sm">{icon}</Text>
+        </View>
+        <Text className="text-gray-400 font-medium">{title}</Text>
+      </View>
+      <Text className="text-accent font-bold">✓</Text>
+    </View>
+  );
+}
+
 function DashboardScreen() {
-  const { state, toggleDiet, updateWorkout, addWater, addPages, updateNotes, getTaskCompletion } = useChallenge();
+  const { state, getTaskCompletion } = useChallenge();
   const router = useRouter();
-  const [reminderModal, setReminderModal] = useState<{ visible: boolean; taskName: string }>({ visible: false, taskName: '' });
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
 
   const completion = getTaskCompletion();
-  const workout1 = state.todayProgress?.workout1;
-  const workout2 = state.todayProgress?.workout2;
-  const waterOz = state.todayProgress?.waterOz || 0;
-  const pagesRead = state.todayProgress?.pagesRead || 0;
-  const notes = state.todayProgress?.notes || '';
-  const bottleSize = state.userSettings?.waterBottleSize || 16;
 
-  const workout1Complete = workout1?.completed && (workout1?.duration || 0) >= WORKOUT_DURATION_MINUTES;
-  const workout2Complete = workout2?.completed && (workout2?.duration || 0) >= WORKOUT_DURATION_MINUTES;
-
+  // Check for milestone
   const isMilestone = MILESTONES.includes(state.currentDay);
   const isComplete = state.currentDay >= CHALLENGE_DAYS && state.todayProgress?.completed;
 
-  const handleWorkout1Toggle = () => {
-    if (!workout1Complete) {
-      updateWorkout(1, { completed: true, duration: WORKOUT_DURATION_MINUTES, endTime: new Date().toISOString() });
-    }
-  };
+  // Handle scroll to show/hide sticky header
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowStickyHeader(offsetY > 200);
+  }, []);
 
-  const handleWorkout2Toggle = () => {
-    if (!workout2Complete) {
-      updateWorkout(2, { completed: true, duration: WORKOUT_DURATION_MINUTES, endTime: new Date().toISOString() });
-    }
-  };
+  // Separate completed and incomplete tasks
+  const taskComponents = [
+    { id: 'diet', done: completion.diet, icon: '🥗', title: 'Diet', component: <DietCard key="diet" /> },
+    { id: 'workout1', done: state.todayProgress?.workout1?.completed && (state.todayProgress?.workout1?.duration || 0) >= 45, icon: '💪', title: 'Workout 1', component: <WorkoutCard key="workout1" workoutNum={1} /> },
+    { id: 'workout2', done: state.todayProgress?.workout2?.completed && (state.todayProgress?.workout2?.duration || 0) >= 45, icon: '💪', title: 'Workout 2', component: <WorkoutCard key="workout2" workoutNum={2} /> },
+    { id: 'water', done: completion.water, icon: '💧', title: 'Water', component: <WaterTracker key="water" /> },
+    { id: 'reading', done: completion.reading, icon: '📖', title: 'Reading', component: <ReadingTracker key="reading" /> },
+    { id: 'photo', done: completion.photo, icon: '📸', title: 'Photo', component: <PhotoCard key="photo" /> },
+  ];
 
-  const openReminder = (taskName: string) => {
-    setReminderModal({ visible: true, taskName });
-  };
-
-  const completedCount = [completion.diet, completion.workouts, completion.water, completion.reading, completion.photo].filter(Boolean).length;
+  const incompleteTasks = taskComponents.filter(t => !t.done);
+  const completedTasks = taskComponents.filter(t => t.done);
 
   return (
     <SafeAreaView className="flex-1 bg-black">
+      {/* Sticky Header */}
+      <StickyProgressHeader visible={showStickyHeader} />
+
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-4">
-          <View className="flex-row items-center">
-            <View className="bg-white rounded-lg p-1.5 mr-2">
-              <Text className="text-black text-lg">♠️</Text>
-            </View>
-            <Text className="text-white text-2xl font-bold">75</Text>
-          </View>
-
-          <Text className="text-accent text-3xl font-black tracking-wider">
-            DAY {state.currentDay || 1}
-          </Text>
-
-          <Pressable onPress={() => router.push('/calendar')} className="p-2">
-            <View className="border-2 border-white rounded p-1">
-              <View className="flex-row">
-                <View className="w-1.5 h-1.5 border border-white m-0.5" />
-                <View className="w-1.5 h-1.5 border border-white m-0.5" />
-              </View>
-              <View className="flex-row">
-                <View className="w-1.5 h-1.5 border border-white m-0.5" />
-                <View className="w-1.5 h-1.5 border border-white m-0.5" />
-              </View>
-            </View>
-          </Pressable>
-        </View>
+        <Header />
 
         {/* Milestone Banner */}
         {isMilestone && (
-          <View className="mx-4 mb-4 bg-accent/20 border border-accent rounded-xl p-3">
-            <Text className="text-accent text-center font-bold">
+          <View className="bg-accent/20 rounded-xl p-4 mb-4">
+            <Text className="text-accent text-center font-bold text-lg">
               🎉 Day {state.currentDay} Milestone!
             </Text>
           </View>
         )}
 
-        {/* Challenge Complete Banner */}
+        {/* Completion Banner */}
         {isComplete && (
-          <View className="mx-4 mb-4 bg-accent rounded-xl p-4">
-            <Text className="text-white text-center font-bold text-xl">
+          <View className="bg-accent rounded-xl p-6 mb-4">
+            <Text className="text-white text-center font-bold text-2xl mb-2">
               🏆 CHALLENGE COMPLETE! 🏆
+            </Text>
+            <Text className="text-white text-center">
+              You've completed 75 Hard!
             </Text>
           </View>
         )}
 
-        {/* Progress Bar */}
-        <View className="px-4 mb-4">
-          <View className="h-1.5 bg-dark-400 rounded-full overflow-hidden">
-            <View
-              className="h-full bg-accent rounded-full"
-              style={{ width: `${(completedCount / 5) * 100}%` }}
-            />
+        {/* Task Summary */}
+        <TaskSummary />
+
+        {/* Incomplete Tasks First */}
+        {incompleteTasks.map(task => task.component)}
+
+        {/* Completed Tasks Section */}
+        {completedTasks.length > 0 && (
+          <View className="mt-2 mb-4">
+            <Text className="text-gray-500 text-sm font-medium mb-2 ml-1">
+              COMPLETED ({completedTasks.length})
+            </Text>
+            {completedTasks.map(task => (
+              <CompletedTaskCard key={task.id} icon={task.icon} title={task.title} />
+            ))}
           </View>
-          <Text className="text-gray-500 text-xs mt-2 text-right">{completedCount}/5 completed</Text>
-        </View>
-
-        {/* Task List */}
-        <View className="px-4">
-          {/* First Workout */}
-          <TaskItem
-            icon="💪"
-            title="First Workout"
-            subtitle={`${WORKOUT_DURATION_MINUTES} min • ${workout1?.isOutdoor ? '🌳 Outdoor' : '🏠 Indoor'}`}
-            time={workout1?.endTime ? new Date(workout1.endTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : undefined}
-            completed={workout1Complete}
-            onToggle={handleWorkout1Toggle}
-            onReminderPress={() => openReminder('First Workout')}
-          />
-
-          {/* Second Workout */}
-          <TaskItem
-            icon="🏃"
-            title="Second Workout"
-            subtitle={`${WORKOUT_DURATION_MINUTES} min • ${workout2?.isOutdoor ? '🌳 Outdoor' : '🏠 Indoor'}`}
-            time={workout2?.endTime ? new Date(workout2.endTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : undefined}
-            completed={workout2Complete}
-            onToggle={handleWorkout2Toggle}
-            onReminderPress={() => openReminder('Second Workout')}
-          />
-
-          {/* Progress Photo */}
-          <TaskItem
-            icon="📸"
-            title="Take Progress Picture"
-            subtitle="Daily photo required"
-            completed={completion.photo}
-            onToggle={() => router.push('/camera')}
-            onReminderPress={() => openReminder('Progress Picture')}
-          />
-
-          {/* Reading */}
-          <View className="bg-dark-200 border border-dark-400 rounded-xl mb-3 overflow-hidden">
-            <View className="flex-row items-center p-4">
-              <View className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
-                completion.reading ? 'bg-accent' : 'bg-accent/20 border border-accent'
-              }`}>
-                <Text className="text-lg">📖</Text>
-              </View>
-              <View className="flex-1">
-                <Text className={`text-base font-semibold ${completion.reading ? 'text-gray-500 line-through' : 'text-white'}`}>
-                  {READING_GOAL_PAGES} Pages of Reading
-                </Text>
-                <Text className="text-gray-500 text-sm">{pagesRead} / {READING_GOAL_PAGES} pages</Text>
-              </View>
-              <View className="flex-row items-center mr-3">
-                <Pressable onPress={() => addPages(-1)} className="bg-dark-400 w-8 h-8 rounded-full items-center justify-center">
-                  <Text className="text-white font-bold">−</Text>
-                </Pressable>
-                <Text className="text-white mx-3 font-bold min-w-[24px] text-center">{pagesRead}</Text>
-                <Pressable onPress={() => addPages(1)} className="bg-accent w-8 h-8 rounded-full items-center justify-center">
-                  <Text className="text-white font-bold">+</Text>
-                </Pressable>
-              </View>
-              <Pressable onPress={() => !completion.reading && addPages(READING_GOAL_PAGES - pagesRead)}>
-                <View className={`w-7 h-7 rounded border-2 items-center justify-center ${
-                  completion.reading ? 'bg-accent border-accent' : 'border-accent'
-                }`}>
-                  {completion.reading && <Text className="text-white text-sm font-bold">✓</Text>}
-                </View>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Water */}
-          <View className="bg-dark-200 border border-dark-400 rounded-xl mb-3 overflow-hidden">
-            <View className="flex-row items-center p-4">
-              <View className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
-                completion.water ? 'bg-accent' : 'bg-accent/20 border border-accent'
-              }`}>
-                <Text className="text-lg">💧</Text>
-              </View>
-              <View className="flex-1">
-                <Text className={`text-base font-semibold ${completion.water ? 'text-gray-500 line-through' : 'text-white'}`}>
-                  Drink a Gallon of Water
-                </Text>
-                <Text className="text-gray-500 text-sm">{waterOz} / {WATER_GOAL_OZ} oz</Text>
-              </View>
-              <View className="flex-row items-center mr-3">
-                <Pressable onPress={() => addWater(-bottleSize)} className="bg-dark-400 px-2 h-8 rounded-full items-center justify-center">
-                  <Text className="text-white text-xs">−{bottleSize}</Text>
-                </Pressable>
-                <Pressable onPress={() => addWater(bottleSize)} className="bg-accent px-2 h-8 rounded-full items-center justify-center ml-2">
-                  <Text className="text-white text-xs">+{bottleSize}</Text>
-                </Pressable>
-              </View>
-              <Pressable onPress={() => !completion.water && addWater(WATER_GOAL_OZ - waterOz)}>
-                <View className={`w-7 h-7 rounded border-2 items-center justify-center ${
-                  completion.water ? 'bg-accent border-accent' : 'border-accent'
-                }`}>
-                  {completion.water && <Text className="text-white text-sm font-bold">✓</Text>}
-                </View>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Follow Diet */}
-          <TaskItem
-            icon="🥗"
-            title="Follow a Diet"
-            subtitle="No cheat meals"
-            completed={completion.diet}
-            onToggle={toggleDiet}
-            showReminder={false}
-          />
-
-          {/* No Alcohol */}
-          <TaskItem
-            icon="🚫"
-            title="No Cheat Meals or Alcohol"
-            subtitle="Stay disciplined"
-            completed={completion.diet}
-            onToggle={toggleDiet}
-            showReminder={false}
-          />
-        </View>
+        )}
 
         {/* Notes Section */}
-        <View className="px-4 mt-4">
-          <View className="bg-dark-200 border border-dark-400 rounded-xl p-4">
-            <Text className="text-gray-500 text-sm mb-2 font-semibold">NOTE:</Text>
-            <TextInput
-              className="text-gray-400 text-sm"
-              placeholder="Make notes of any challenges, insights, or breakthroughs..."
-              placeholderTextColor="#4b5563"
-              multiline
-              numberOfLines={3}
-              value={notes}
-              onChangeText={updateNotes}
-              style={{ minHeight: 60, textAlignVertical: 'top' }}
-            />
-          </View>
-        </View>
+        <NotesSection />
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -315,16 +230,6 @@ function DashboardScreen() {
           </View>
         </SafeAreaView>
       </View>
-
-      {/* Reminder Modal */}
-      <ReminderModal
-        visible={reminderModal.visible}
-        taskName={reminderModal.taskName}
-        onClose={() => setReminderModal({ visible: false, taskName: '' })}
-        onSave={(days, hour, minute, isPM) => {
-          console.log('Reminder set:', { days, hour, minute, isPM });
-        }}
-      />
     </SafeAreaView>
   );
 }
@@ -359,7 +264,13 @@ export default function HomeScreen() {
     );
   }
 
-  if (!state.hasCompletedOnboarding || !state.startDate || state.currentDay === 0) {
+  // Show onboarding if not completed
+  if (!state.hasCompletedOnboarding) {
+    return <OnboardingScreen />;
+  }
+
+  // Show start screen if challenge hasn't begun
+  if (!state.startDate || state.currentDay === 0) {
     return <OnboardingScreen />;
   }
 
