@@ -1,12 +1,43 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable, Image, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useChallenge } from '@/context/ChallengeContext';
 
 export function PhotoCard() {
-  const { state } = useChallenge();
+  const { state, setPhoto } = useChallenge();
   const router = useRouter();
   const photoUri = state.todayProgress?.photoUri;
   const hasPhoto = photoUri !== null;
+
+  // Direct gallery picker for native platforms
+  const pickFromGallery = async () => {
+    if (Platform.OS === 'web') {
+      // On web, go to camera screen which handles file input
+      router.push('/camera');
+      return;
+    }
+
+    try {
+      const ImagePicker = await import('expo-image-picker');
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
+        allowsEditing: true,
+        aspect: [3, 4],
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setPhoto(result.assets[0].uri);
+        Alert.alert(
+          'Photo Selected!',
+          "Today's progress photo has been set.",
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to open gallery. Please try again.');
+    }
+  };
 
   return (
     <View className="bg-dark-300 rounded-2xl p-5 mb-4">
@@ -44,20 +75,41 @@ export function PhotoCard() {
           </View>
         </Pressable>
       ) : (
-        <Pressable
-          onPress={() => router.push('/camera')}
-          className="bg-dark-400 rounded-xl h-48 items-center justify-center border-2 border-dashed border-gray-600"
-        >
-          <Text className="text-4xl mb-2">📷</Text>
-          <Text className="text-white font-semibold">Add Today's Photo</Text>
-          <Text className="text-gray-500 text-sm mt-1">Take photo or upload from gallery</Text>
-        </Pressable>
+        <View>
+          {/* Action Buttons */}
+          <View className="flex-row gap-2 mb-3">
+            {/* Take Photo Button */}
+            <Pressable
+              onPress={() => router.push('/camera')}
+              className="flex-1 bg-accent rounded-xl py-4 items-center justify-center"
+            >
+              <Text className="text-2xl mb-1">📷</Text>
+              <Text className="text-white font-semibold text-sm">Take Photo</Text>
+            </Pressable>
+
+            {/* Upload from Gallery Button */}
+            <Pressable
+              onPress={pickFromGallery}
+              className="flex-1 bg-dark-400 rounded-xl py-4 items-center justify-center border-2 border-dashed border-gray-600"
+            >
+              <Text className="text-2xl mb-1">🖼️</Text>
+              <Text className="text-white font-semibold text-sm">
+                {Platform.OS === 'web' ? 'Choose File' : 'From Gallery'}
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Info text */}
+          <Text className="text-gray-500 text-xs text-center mb-3">
+            Take a new photo or upload an existing one from your gallery
+          </Text>
+        </View>
       )}
 
       {/* View all photos link */}
       <Pressable
         onPress={() => router.push('/photos')}
-        className="mt-4 py-3 bg-dark-400 rounded-xl"
+        className="mt-1 py-3 bg-dark-400 rounded-xl"
       >
         <Text className="text-white text-center">View All Progress Photos</Text>
       </Pressable>
