@@ -91,13 +91,7 @@ function areWorkoutsComplete(day: DayProgress): boolean {
   // Both must be at least 45 minutes
   if (w1.duration < WORKOUT_DURATION_MINUTES || w2.duration < WORKOUT_DURATION_MINUTES) return false;
 
-  // Must be 3 hours apart (if both have timestamps)
-  if (w1.endTime && w2.startTime) {
-    const w1End = new Date(w1.endTime).getTime();
-    const w2Start = new Date(w2.startTime).getTime();
-    const hoursBetween = (w2Start - w1End) / (1000 * 60 * 60);
-    if (hoursBetween < WORKOUT_GAP_HOURS) return false;
-  }
+  // Note: 3-hour gap requirement removed to allow back-to-back workouts
 
   return true;
 }
@@ -511,22 +505,9 @@ export function ChallengeProvider({ children }: { children: React.ReactNode }) {
   }, [state.todayProgress]);
 
   const getWorkoutGapInfo = useCallback(() => {
-    const day = state.todayProgress;
-    if (!day?.workout1.endTime) {
-      return { canStartSecond: true, timeRemaining: null };
-    }
-
-    const w1End = new Date(day.workout1.endTime).getTime();
-    const now = Date.now();
-    const hoursSinceFirst = (now - w1End) / (1000 * 60 * 60);
-
-    if (hoursSinceFirst >= WORKOUT_GAP_HOURS) {
-      return { canStartSecond: true, timeRemaining: null };
-    }
-
-    const msRemaining = (WORKOUT_GAP_HOURS * 60 * 60 * 1000) - (now - w1End);
-    return { canStartSecond: false, timeRemaining: Math.ceil(msRemaining / 60000) };
-  }, [state.todayProgress]);
+    // 3-hour gap requirement removed - workouts can be done back-to-back
+    return { canStartSecond: true, timeRemaining: null };
+  }, []);
 
   return (
     <ChallengeContext.Provider

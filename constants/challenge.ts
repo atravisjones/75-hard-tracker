@@ -32,7 +32,7 @@ export const DAILY_TASKS: TaskConfig[] = [
   {
     id: 'workouts',
     title: 'Two 45-Min Workouts',
-    subtitle: 'One must be outdoors, 3+ hours apart',
+    subtitle: 'One must be outdoors',
     icon: '💪',
   },
   {

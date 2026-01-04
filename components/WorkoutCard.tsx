@@ -106,18 +106,6 @@ export function WorkoutCard({ workoutNum }: WorkoutCardProps) {
         )}
       </View>
 
-      {/* Gap warning for workout 2 */}
-      {workoutNum === 2 && !canStart && gapInfo.timeRemaining && (
-        <View className="bg-yellow-900/30 rounded-lg p-3 mb-4">
-          <Text className="text-yellow-500 text-sm text-center">
-            ⏰ Wait {gapInfo.timeRemaining} min before starting
-          </Text>
-          <Text className="text-gray-500 text-xs text-center mt-1">
-            Must be {WORKOUT_GAP_HOURS}+ hours after workout 1
-          </Text>
-        </View>
-      )}
-
       {/* Timer Display */}
       {!isComplete && (
         <View className="items-center mb-4">

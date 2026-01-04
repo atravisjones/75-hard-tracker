@@ -65,7 +65,7 @@ function OnboardingScreen() {
             <TaskRule
               icon="💪"
               title="Two 45-min Workouts"
-              desc="One must be outdoors, 3+ hours apart"
+              desc="One must be outdoors"
             />
             <TaskRule
               icon="📖"

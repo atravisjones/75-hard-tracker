@@ -49,8 +49,8 @@ export function PhotoCard() {
           className="bg-dark-400 rounded-xl h-48 items-center justify-center border-2 border-dashed border-gray-600"
         >
           <Text className="text-4xl mb-2">📷</Text>
-          <Text className="text-white font-semibold">Take Today's Photo</Text>
-          <Text className="text-gray-500 text-sm mt-1">Tap to open camera</Text>
+          <Text className="text-white font-semibold">Add Today's Photo</Text>
+          <Text className="text-gray-500 text-sm mt-1">Take photo or upload from gallery</Text>
         </Pressable>
       )}
 
