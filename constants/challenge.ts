@@ -18,16 +18,10 @@ export const READING_GOAL_PAGES = 10;
 // The 5 daily tasks
 export const DAILY_TASKS: TaskConfig[] = [
   {
-    id: 'diet',
-    title: 'Follow Diet',
-    subtitle: 'No cheat meals, no alcohol',
-    icon: '🥗',
-  },
-  {
-    id: 'workouts',
-    title: 'Two 45-Min Workouts',
-    subtitle: 'One must be outdoors, 3+ hours apart',
-    icon: '💪',
+    id: 'photo',
+    title: 'Progress Photo',
+    subtitle: 'Take a daily photo',
+    icon: '📸',
   },
   {
     id: 'water',
@@ -36,16 +30,22 @@ export const DAILY_TASKS: TaskConfig[] = [
     icon: '💧',
   },
   {
+    id: 'workouts',
+    title: 'Two 45-Min Workouts',
+    subtitle: 'One must be outdoors, 3+ hours apart',
+    icon: '💪',
+  },
+  {
     id: 'reading',
     title: 'Read 10 Pages',
     subtitle: 'Non-fiction / self-development',
     icon: '📖',
   },
   {
-    id: 'photo',
-    title: 'Progress Photo',
-    subtitle: 'Take a daily photo',
-    icon: '📸',
+    id: 'diet',
+    title: 'Follow Diet',
+    subtitle: 'No cheat meals, no alcohol',
+    icon: '🥗',
   },
 ];
 

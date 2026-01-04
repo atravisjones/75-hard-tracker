@@ -53,14 +53,9 @@ function OnboardingScreen() {
 
           <View className="gap-4">
             <TaskRule
-              icon="🥗"
-              title="Follow a Diet"
-              desc="No cheat meals, no alcohol"
-            />
-            <TaskRule
-              icon="💪"
-              title="Two 45-min Workouts"
-              desc="One must be outdoors, 3+ hours apart"
+              icon="📸"
+              title="Take a Progress Photo"
+              desc="Document your journey daily"
             />
             <TaskRule
               icon="💧"
@@ -68,14 +63,19 @@ function OnboardingScreen() {
               desc="128 oz throughout the day"
             />
             <TaskRule
+              icon="💪"
+              title="Two 45-min Workouts"
+              desc="One must be outdoors, 3+ hours apart"
+            />
+            <TaskRule
               icon="📖"
               title="Read 10 Pages"
               desc="Non-fiction / self-development"
             />
             <TaskRule
-              icon="📸"
-              title="Take a Progress Photo"
-              desc="Document your journey daily"
+              icon="🥗"
+              title="Follow a Diet"
+              desc="No cheat meals, no alcohol"
             />
           </View>
         </View>
@@ -149,12 +149,12 @@ function DashboardScreen() {
 
   // Separate completed and incomplete tasks
   const taskComponents = [
-    { id: 'diet', done: completion.diet, icon: '🥗', title: 'Diet', component: <DietCard key="diet" /> },
+    { id: 'photo', done: completion.photo, icon: '📸', title: 'Photo', component: <PhotoCard key="photo" /> },
+    { id: 'water', done: completion.water, icon: '💧', title: 'Water', component: <WaterTracker key="water" /> },
     { id: 'workout1', done: state.todayProgress?.workout1?.completed && (state.todayProgress?.workout1?.duration || 0) >= 45, icon: '💪', title: 'Workout 1', component: <WorkoutCard key="workout1" workoutNum={1} /> },
     { id: 'workout2', done: state.todayProgress?.workout2?.completed && (state.todayProgress?.workout2?.duration || 0) >= 45, icon: '💪', title: 'Workout 2', component: <WorkoutCard key="workout2" workoutNum={2} /> },
-    { id: 'water', done: completion.water, icon: '💧', title: 'Water', component: <WaterTracker key="water" /> },
     { id: 'reading', done: completion.reading, icon: '📖', title: 'Reading', component: <ReadingTracker key="reading" /> },
-    { id: 'photo', done: completion.photo, icon: '📸', title: 'Photo', component: <PhotoCard key="photo" /> },
+    { id: 'diet', done: completion.diet, icon: '🥗', title: 'Diet', component: <DietCard key="diet" /> },
   ];
 
   const incompleteTasks = taskComponents.filter(t => !t.done);
